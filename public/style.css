@@ -27,6 +27,9 @@ form div {
 .storage {
   width: 50%;
   height: 500px;
-  border: black 5px;
-  color: purple;
+  overflow: auto;
+}
+
+.storage-header {
+  text-align: center;
 }

@@ -13,10 +13,10 @@ export const UserHome = props => {
       <h3>Welcome, {email}</h3>
       <div className="split-screen">
         <div className="storage" id="storage1">
-          <h1>Here is the first online storage</h1>
+          <h1 className="storage-header">Here is the first online storage</h1>
         </div>
         <div className="storage" id="storage2">
-          <h1>Here is the second online storage</h1>
+          <h1 className="storage-header">Here is the second online storage</h1>
         </div>
       </div>
     </div>
