@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import DropboxComponenet from './dropbox';
 
 /**
  * COMPONENT
@@ -17,6 +18,7 @@ export const UserHome = props => {
         </div>
         <div className="storage" id="storage2">
           <h1 className="storage-header">Here is the second online storage</h1>
+          <DropboxComponenet />
         </div>
       </div>
     </div>
