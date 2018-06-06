@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import axios from 'axios';
 require('isomorphic-fetch');
 const Dropbox = require('dropbox').Dropbox;
 const dbx = new Dropbox({
@@ -40,6 +41,50 @@ class DropboxComponent extends Component {
       });
   };
 
+  copyFiles = () => {
+    dbx.filesCopyV2();
+  };
+
+  downloadFiles = fileName => {
+    dbx
+      .filesDownload({ path: fileName })
+      .then(response => {
+        console.log(response);
+        const blob = response.fileBlob;
+        // var reader = new FileReader();
+        // reader.onloadend = function(evt) {
+        //   console.log('read success');
+        //   console.log(evt.target.result);
+        // };
+        // reader.readAsText(blob);
+        // console.log(this);
+        // console.log(this.downloadFiles);
+        // this.downloadFiles(fileName);
+        console.log('about to copy to Google Drive');
+        axios({
+          method: 'post',
+          url: `https://www.googleapis.com/upload/drive/v3/files?uploadType=media`,
+          config: {
+            headers: {
+              Authorization: `Bearer ${dbx.accessToken}`,
+              'Content-Type': blob.type,
+              'Content-Length': response.size,
+            },
+            data: response,
+          },
+        })
+          .then(value => {
+            console.log(value);
+          })
+          .catch(err => {
+            console.error(err);
+          });
+      })
+      .catch(err => {
+        console.error(err);
+      });
+  };
+
   render() {
     return (
       <div>
@@ -53,7 +98,14 @@ class DropboxComponent extends Component {
           {this.state.files.map(file => {
             return (
               <div key={file.id}>
-                <p>{file.name}</p>
+                <button
+                  type="submit"
+                  onClick={() => {
+                    this.downloadFiles(file.path_display);
+                  }}
+                >
+                  {file.name}
+                </button>
               </div>
             );
           })}
