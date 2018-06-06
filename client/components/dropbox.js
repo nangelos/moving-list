@@ -1,8 +1,13 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import {
+  googleClientId,
+  googleApiKey,
+  googleAccessToken,
+} from './google-drive';
 require('isomorphic-fetch');
 const Dropbox = require('dropbox').Dropbox;
-const dbx = new Dropbox({
+export const dbx = new Dropbox({
   clientId: 'u373kipjvd3wu1q',
   accessToken:
     'aHS8DfEzrlIAAAAAAAADcBI9T50NNE8N3N77A9MTj0XYHWrC9iJhthqt5GyJTV8J',
@@ -61,12 +66,13 @@ class DropboxComponent extends Component {
         // console.log(this.downloadFiles);
         // this.downloadFiles(fileName);
         console.log('about to copy to Google Drive');
+        console.log('here is the access token', googleAccessToken);
         axios({
           method: 'post',
           url: `https://www.googleapis.com/upload/drive/v3/files?uploadType=media`,
           config: {
             headers: {
-              Authorization: `Bearer ${dbx.accessToken}`,
+              Authorization: googleAccessToken,
               'Content-Type': blob.type,
               'Content-Length': response.size,
             },

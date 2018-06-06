@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import { dbx } from './dropbox';
+export let googleAccessToken;
 // const googleDrive = require('google-drive');
 
-const googleClientId =
+export const googleClientId =
   '1056413076451-a86v998vikmpsfbnbc1lmterles60dlp.apps.googleusercontent.com';
-const googleApiKey = 'AIzaSyBeg3KrZrPMVwKSz5iCiVnYS8bEWOY9Zbg';
+export const googleApiKey = 'AIzaSyBeg3KrZrPMVwKSz5iCiVnYS8bEWOY9Zbg';
 
 // Array of API discovery doc URLs for APIs used by the quickstart
 const DISCOVERY_DOCS = [
@@ -43,9 +45,9 @@ class GoogleDriveComponent extends Component {
   componentDidMount() {
     gapi.load('client:auth2', this.initClient);
   }
-  // handleClientLoad() {
-  //   gapi.load('client:auth2', initClient);
-  // }
+  handleClientLoad() {
+    gapi.load('client:auth2', this.initClient);
+  }
 
   /**
    *  Called when the signed in status changes, to update the UI
@@ -70,6 +72,9 @@ class GoogleDriveComponent extends Component {
   }
 
   viewFiles = () => {
+    if (gapi.auth.getToken) {
+      googleAccessToken = gapi.auth.getToken().accessToken;
+    }
     gapi.client.drive.files.list({}).then(response => {
       console.log(response);
       this.setState({ files: response.result.files });
@@ -77,10 +82,33 @@ class GoogleDriveComponent extends Component {
   };
 
   downloadFiles = fileName => {
+    console.log(fileName);
+    // gapi.client.drive.files
+    //   .copy({ fileId: fileName })
+    //   .then(response => {
+    //     console.log('here is the response', response);
+    // axios({
+    //   method: 'get',
+    //   url: `https://www.googleapis.com/drive/v3/files/${fileName.id}?alt=media`,
+    // })
+    //   .then(response => {
+    //     console.log(response);
+    //   })
+    //   .catch(err => {
+    //     console.error(err);
+    //   });
     gapi.client.drive.files
-      .copy({ fileId: fileName })
+      .get({ fileId: fileName.id /*, type: 'media'*/ })
       .then(response => {
         console.log(response);
+        dbx
+          .filesUpload({
+            contents: response.result,
+            path: `/${fileName.name}`,
+          })
+          .then(after => {
+            console.log('here is the after message', after);
+          });
       })
       .catch(err => {
         console.error(err);
@@ -151,6 +179,7 @@ class GoogleDriveComponent extends Component {
 
   render() {
     console.log('here is gapi', gapi);
+    // if (gapi.client.getToken) console.log(gapi.client.getToken);
     return (
       <div>
         <button type="submit" onClick={this.connectToGoogle}>
@@ -166,7 +195,7 @@ class GoogleDriveComponent extends Component {
                 <button
                   type="submit"
                   onClick={() => {
-                    this.downloadFiles(file.id);
+                    this.downloadFiles(file);
                   }}
                 >
                   {file.name}
