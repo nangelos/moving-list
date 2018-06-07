@@ -1,20 +1,15 @@
 import React, { Component } from 'react';
-import axios from 'axios';
 import { dbx } from './dropbox';
 export let googleAccessToken;
-// const googleDrive = require('google-drive');
 
-export const googleClientId =
+const googleClientId =
   '1056413076451-a86v998vikmpsfbnbc1lmterles60dlp.apps.googleusercontent.com';
-export const googleApiKey = 'AIzaSyBeg3KrZrPMVwKSz5iCiVnYS8bEWOY9Zbg';
+const googleApiKey = 'AIzaSyBeg3KrZrPMVwKSz5iCiVnYS8bEWOY9Zbg';
 
-// Array of API discovery doc URLs for APIs used by the quickstart
 const DISCOVERY_DOCS = [
   'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest',
 ];
 
-// Authorization scopes required by the API; multiple scopes can be
-// included, separated by spaces.
 const SCOPES = 'https://www.googleapis.com/auth/drive';
 
 class GoogleDriveComponent extends Component {
@@ -35,11 +30,7 @@ class GoogleDriveComponent extends Component {
       })
       .then(function() {
         // Listen for sign-in state changes.
-        gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
-        // Handle the initial sign-in state.
-        updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
-        authorizeButton.onclick = handleAuthClick;
-        signoutButton.onclick = handleSignoutClick;
+        gapi.auth2.getAuthInstance().isSignedIn.listen(this.updateSigninStatus);
       });
   }
   componentDidMount() {
@@ -49,10 +40,6 @@ class GoogleDriveComponent extends Component {
     gapi.load('client:auth2', this.initClient);
   }
 
-  /**
-   *  Called when the signed in status changes, to update the UI
-   *  appropriately. After a sign-in, the API is called.
-   */
   updateSigninStatus(isSignedIn) {
     if (isSignedIn) {
       authorizeButton.style.display = 'none';
@@ -64,9 +51,6 @@ class GoogleDriveComponent extends Component {
     }
   }
 
-  /**
-   *  Sign in the user upon button click.
-   */
   connectToGoogle(event) {
     gapi.auth2.getAuthInstance().signIn();
   }
@@ -82,32 +66,16 @@ class GoogleDriveComponent extends Component {
   };
 
   downloadFiles = fileName => {
-    console.log(fileName);
-    // gapi.client.drive.files
-    //   .copy({ fileId: fileName })
-    //   .then(response => {
-    //     console.log('here is the response', response);
-    // axios({
-    //   method: 'get',
-    //   url: `https://www.googleapis.com/drive/v3/files/${fileName.id}?alt=media`,
-    // })
-    //   .then(response => {
-    //     console.log(response);
-    //   })
-    //   .catch(err => {
-    //     console.error(err);
-    //   });
     gapi.client.drive.files
-      .get({ fileId: fileName.id /*, type: 'media'*/ })
+      .get({ fileId: fileName.id, alt: 'media' })
       .then(response => {
-        console.log(response);
         dbx
           .filesUpload({
-            contents: response.result,
+            contents: response.body,
             path: `/${fileName.name}`,
           })
           .then(after => {
-            console.log('here is the after message', after);
+            console.log('After Message: ', after);
           });
       })
       .catch(err => {
@@ -115,71 +83,7 @@ class GoogleDriveComponent extends Component {
       });
   };
 
-  /**
-   *  Sign out the user upon button click.
-   **/
-  // handleSignoutClick(event) {
-  //   gapi.auth2.getAuthInstance().signOut();
-  // }
-
-  /**
-   * Append a pre element to the body containing the given message
-   * as its text node. Used to display the results of the API call.
-   *@ param {string} message Text to be placed in pre element.
-   */
-  // appendPre(message) {
-  //   const pre = document.getElementById('content');
-  //   const textContent = document.createTextNode(message + '\n');
-  //   pre.appendChild(textContent);
-  // }
-
-  /**
-   * Print files.
-   */
-  // listFiles() {
-  //   gapi.client.drive.files
-  //     .list({
-  //       pageSize: 10,
-  //       fields: 'nextPageToken, files(id, name)',
-  //     })
-  //     .then(function(response) {
-  //       appendPre('Files:');
-  //       var files = response.result.files;
-  //       if (files && files.length > 0) {
-  //         for (var i = 0; i < files.length; i++) {
-  //           var file = files[i];
-  //           appendPre(file.name + ' (' + file.id + ')');
-  //         }
-  //       } else {
-  //         appendPre('No files found.');
-  //       }
-  //     });
-  // }
-
-  // downloadFiles = fileName => {
-  //   dbx
-  //     .filesDownload({ path: fileName })
-  //     .then(response => {
-  //       console.log(response);
-  //       // var blob = response.fileBlob;
-  //       // var reader = new FileReader();
-  //       // reader.onloadend = function(evt) {
-  //       //   console.log('read success');
-  //       //   console.log(evt.target.result);
-  //       // };
-  //       // reader.readAsText(blob);
-  //       // console.log(this);
-  //       // console.log(this.downloadFiles);
-  //       // this.downloadFiles(fileName);
-  //     })
-  //     .catch(err => {
-  //       console.error(err);
-  //     });
-  // };
-
   render() {
-    console.log('here is gapi', gapi);
-    // if (gapi.client.getToken) console.log(gapi.client.getToken);
     return (
       <div>
         <button type="submit" onClick={this.connectToGoogle}>
